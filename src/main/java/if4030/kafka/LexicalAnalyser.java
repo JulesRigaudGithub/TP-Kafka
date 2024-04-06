@@ -5,26 +5,51 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 
+final class Lemme {
+    public final String word;
+    public final String cat;
 
-public final class LineParser {
+    public Lemme(String word, String category) {
+        this.word = word;
+        this.cat = category;
+    }
+}
 
-    public static final String INPUT_TOPIC = "lines-stream";
-    public static final String OUTPUT_TOPIC = "words-stream";
+public final class LexicalAnalyser {
+
+    public static final String INPUT_TOPIC = "words-stream";
+    public static final String OUTPUT_TOPIC = "tagged-words-stream";
+    public static final String LEX_PATH = "lex/lexique.csv";
+
+    private static Map<String, Lemme> lexicalMap = new HashMap<>();
 
     static Properties getStreamsConfig(final String[] args) throws IOException {
         final Properties props = new Properties();
 
-        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "line-parser");
+        try (final BufferedReader reader = new BufferedReader(new FileReader(LEX_PATH));) {
+            String line = reader.readLine();
+            while (line != null) {
+                String[] splited = line.split(",");
+                lexicalMap.put(splited[0], new Lemme(splited[1], splited[2]));
+
+                line = reader.readLine();
+            }
+        }
+
+        props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "lexical-analyser");
         props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.putIfAbsent(StreamsConfig.STATESTORE_CACHE_MAX_BYTES_CONFIG, 0);
         props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
@@ -34,27 +59,30 @@ public final class LineParser {
         // Note: To re-run the demo, you need to use the offset reset tool:
         // https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Streams+Application+Reset+Tool
         props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
         return props;
     }
 
-    static void createWordCountStream(final StreamsBuilder builder) {
-        // On souhaite matcher avec les caractères alphanumériques ainsi qu'avec le "-"
-        // on doit échapper le caractère \ pour que le processeur regex obtienne "\-" car
-        // il faut échapper "-" pour pas qu'il signifie l'opérateur "n'importe quel caractère entre"
-        final Pattern pattern = Pattern.compile("[a-zA-Z\\-]+");
+    static void createLexicalStream(final StreamsBuilder builder) {
         final KStream<String, String> source = builder.stream(INPUT_TOPIC);
 
-        source
-            .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split("\\s+")))
-            .filter((key, word) -> pattern.matcher(word).matches())
-            .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
+        final KStream<String, String> transformedStream = source.map((key, value) -> {
+            if (lexicalMap.containsKey(value)) {
+                Lemme lemme = lexicalMap.get(value);
+                return KeyValue.pair(lemme.word, lemme.cat);
+            } else {
+                return KeyValue.pair(value, "null");
+            }
+        });
+
+        transformedStream.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
     }
 
     public static void main(final String[] args) throws IOException {
         final Properties props = getStreamsConfig(args);
 
         final StreamsBuilder builder = new StreamsBuilder();
-        createWordCountStream(builder);
+        createLexicalStream(builder);
         final KafkaStreams streams = new KafkaStreams(builder.build(), props);
         final CountDownLatch latch = new CountDownLatch(1);
 
