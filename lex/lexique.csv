@@ -1,4 +1,3 @@
-1_ortho,3_lemme,4_cgram
 a,a,NOM
 a,avoir,AUX
 a,avoir,VER
@@ -86568,7 +86567,6 @@ naissons,naître,VER
 naja,naja,NOM
 najas,naja,NOM
 namibiens,namibien,NOM
-,,NOM
 nana,nana,NOM
 nanan,nanan,NOM
 nanar,nanar,NOM
@@ -88627,7 +88625,6 @@ nôtre,nôtre,ADJ:pos
 nôtre,nôtre,PRO:pos
 nôtres,nôtres,ADJ:pos
 nôtres,nôtres,PRO:pos
-o,o,
 o,o,NOM
 oaristys,oaristys,NOM
 oasis,oasis,NOM
@@ -127758,7 +127755,6 @@ tchétchènes,tchétchène,NOM
 te,te,PRO:per
 te deum,te deum,NOM
 tea-room,tea-room,NOM
-team,team,
 team,team,NOM
 teams,team,NOM
 teaser,teaser,NOM
@@ -137701,9 +137697,7 @@ zézayer,zézayer,VER
 zézette,zézette,NOM
 zézettes,zézette,NOM
 à,à,PRE
-à brûle-pourpoint,à brûle-pourpoint,
 à brûle-pourpoint,à_brûle-pourpoint,ADV
-à cloche-pied,à cloche-pied,
 à cloche-pied,à_cloche-pied,ADV
 à cropetons,à cropetons,ADV
 à croupetons,à croupetons,ADV
@@ -137725,15 +137719,11 @@ zézettes,zézette,NOM
 à notre encontre,à notre encontre,ADV
 à posteriori,a posteriori,ADV
 à priori,a priori,ADV
-à rebrousse-poil,à rebrousse-poil,
 à rebrousse-poil,à_rebrousse-poil,ADV
 à son encontre,à son encontre,ADV
-à tire-larigot,à tire-larigot,
 à tire-larigot,à_tire-larigot,ADV
 à ton encontre,à ton encontre,ADV
-à touche-touche,à touche-touche,
 à touche-touche,à_touche-touche,ADV
-à tue-tête,à tue-tête,
 à tue-tête,à_tue-tête,ADV
 à tâtons,à tâtons,ADV
 à votre encontre,à votre encontre,ADV
